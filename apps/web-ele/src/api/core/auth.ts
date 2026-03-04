@@ -1,13 +1,19 @@
 import { baseRequestClient, requestClient } from '#/api/request';
 
 export namespace AuthApi {
-  /** 登录接口参数 */
+  /** 账号密码登录参数 */
   export interface LoginParams {
     password?: string;
     username?: string;
   }
 
-  /** 登录接口返回值 */
+  /** 手机验证码登录参数 */
+  export interface LoginByCodeParams {
+    mobile: string;
+    code: string;
+  }
+
+  /** 后端返回：data.token */
   export interface LoginResult {
     accessToken: string;
   }
@@ -19,10 +25,33 @@ export namespace AuthApi {
 }
 
 /**
- * 登录
+ * 统一映射登录响应：兼容两种字段名
+ *   - Mock server / 部分后端：data.accessToken
+ *   - 真实后端：          data.token
+ */
+function mapLoginResult(raw: { accessToken?: string; token?: string }): AuthApi.LoginResult {
+  return { accessToken: raw?.accessToken ?? raw?.token ?? '' };
+}
+
+/**
+ * 账号密码登录
+ * POST /api/auth/login
  */
 export async function loginApi(data: AuthApi.LoginParams) {
-  return requestClient.post<AuthApi.LoginResult>('/auth/login', data);
+  const res = await requestClient.post<{ accessToken?: string; token?: string }>('/auth/login', data);
+  return mapLoginResult(res as unknown as { accessToken?: string; token?: string });
+}
+
+/**
+ * 手机号+验证码登录
+ * POST /api/auth/loginByCode
+ */
+export async function loginByCodeApi(data: AuthApi.LoginByCodeParams) {
+  const res = await requestClient.post<{ accessToken?: string; token?: string }>(
+    '/auth/loginByCode',
+    data,
+  );
+  return mapLoginResult(res as unknown as { accessToken?: string; token?: string });
 }
 
 /**
@@ -36,11 +65,10 @@ export async function refreshTokenApi() {
 
 /**
  * 退出登录
+ * POST /api/auth/logout，需携带 Authorization
  */
 export async function logoutApi() {
-  return baseRequestClient.post('/auth/logout', {
-    withCredentials: true,
-  });
+  return requestClient.post<unknown>('/auth/logout', {});
 }
 
 /**

@@ -10,7 +10,13 @@ import { resetAllStores, useAccessStore, useUserStore } from '@vben/stores';
 import { ElNotification } from 'element-plus';
 import { defineStore } from 'pinia';
 
-import { getAccessCodesApi, getUserInfoApi, loginApi, logoutApi } from '#/api';
+import {
+  getAccessCodesApi,
+  getUserInfoApi,
+  loginApi,
+  loginByCodeApi,
+  logoutApi,
+} from '#/api';
 import { $t } from '#/locales';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -20,62 +26,81 @@ export const useAuthStore = defineStore('auth', () => {
 
   const loginLoading = ref(false);
 
+  /** 使用 accessToken 完成后续流程（写 store、拉用户信息、跳转） */
+  async function afterLoginSuccess(
+    accessToken: string,
+    onSuccess?: () => Promise<void> | void,
+  ) {
+    const accessStore = useAccessStore();
+    accessStore.setAccessToken(accessToken);
+    const [fetchUserInfoResult, accessCodes] = await Promise.all([
+      fetchUserInfo(),
+      getAccessCodesApi(),
+    ]);
+    const userInfo = fetchUserInfoResult;
+    userStore.setUserInfo(userInfo);
+    accessStore.setAccessCodes(accessCodes);
+    if (accessStore.loginExpired) {
+      accessStore.setLoginExpired(false);
+    } else {
+      onSuccess
+        ? await onSuccess?.()
+        : await router.push(
+            userInfo?.homePath || preferences.app.defaultHomePath,
+          );
+    }
+    if (userInfo?.realName) {
+      ElNotification({
+        message: `${$t('authentication.loginSuccessDesc')}:${userInfo?.realName}`,
+        title: $t('authentication.loginSuccess'),
+        type: 'success',
+      });
+    }
+    return { userInfo };
+  }
+
   /**
-   * 异步处理登录操作
-   * Asynchronously handle the login process
-   * @param params 登录表单数据
+   * 异步处理登录操作（账号密码）
+   * @param params 登录表单数据 { username, password }
    */
   async function authLogin(
     params: Recordable<any>,
     onSuccess?: () => Promise<void> | void,
   ) {
-    // 异步处理用户登录操作并获取 accessToken
     let userInfo: null | UserInfo = null;
     try {
       loginLoading.value = true;
       const { accessToken } = await loginApi(params);
-
-      // 如果成功获取到 accessToken
       if (accessToken) {
-        // 将 accessToken 存储到 accessStore 中
-        accessStore.setAccessToken(accessToken);
-
-        // 获取用户信息并存储到 accessStore 中
-        const [fetchUserInfoResult, accessCodes] = await Promise.all([
-          fetchUserInfo(),
-          getAccessCodesApi(),
-        ]);
-
-        userInfo = fetchUserInfoResult;
-
-        userStore.setUserInfo(userInfo);
-        accessStore.setAccessCodes(accessCodes);
-
-        if (accessStore.loginExpired) {
-          accessStore.setLoginExpired(false);
-        } else {
-          onSuccess
-            ? await onSuccess?.()
-            : await router.push(
-                userInfo.homePath || preferences.app.defaultHomePath,
-              );
-        }
-
-        if (userInfo?.realName) {
-          ElNotification({
-            message: `${$t('authentication.loginSuccessDesc')}:${userInfo?.realName}`,
-            title: $t('authentication.loginSuccess'),
-            type: 'success',
-          });
-        }
+        const result = await afterLoginSuccess(accessToken, onSuccess);
+        userInfo = result.userInfo ?? null;
       }
     } finally {
       loginLoading.value = false;
     }
+    return { userInfo };
+  }
 
-    return {
-      userInfo,
-    };
+  /**
+   * 手机号+验证码登录
+   * @param params { mobile, code }
+   */
+  async function authLoginByCode(
+    params: { mobile: string; code: string },
+    onSuccess?: () => Promise<void> | void,
+  ) {
+    let userInfo: null | UserInfo = null;
+    try {
+      loginLoading.value = true;
+      const { accessToken } = await loginByCodeApi(params);
+      if (accessToken) {
+        const result = await afterLoginSuccess(accessToken, onSuccess);
+        userInfo = result.userInfo ?? null;
+      }
+    } finally {
+      loginLoading.value = false;
+    }
+    return { userInfo };
   }
 
   async function logout(redirect: boolean = true) {
@@ -112,6 +137,7 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     $reset,
     authLogin,
+    authLoginByCode,
     fetchUserInfo,
     loginLoading,
     logout,

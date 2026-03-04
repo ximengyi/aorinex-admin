@@ -7,6 +7,8 @@ import { computed, ref } from 'vue';
 import { AuthenticationCodeLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
+import { useAuthStore } from '#/store';
+
 defineOptions({ name: 'CodeLogin' });
 
 const loading = ref(false);
@@ -49,14 +51,14 @@ const formSchema = computed((): VbenFormSchema[] => {
     },
   ];
 });
-/**
- * 异步处理登录操作
- * Asynchronously handle the login process
- * @param values 登录表单数据
- */
+const authStore = useAuthStore();
+
+/** 验证码登录：后端要求 mobile、code */
 async function handleLogin(values: Recordable<any>) {
-  // eslint-disable-next-line no-console
-  console.log(values);
+  await authStore.authLoginByCode({
+    mobile: values.phoneNumber,
+    code: values.code,
+  });
 }
 </script>
 

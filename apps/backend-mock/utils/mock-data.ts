@@ -38,19 +38,37 @@ export const MOCK_USERS: UserInfo[] = [
   },
 ];
 
+/** 系统所有权限码，与后端 system/rule href 字段保持一致 */
+const SYSTEM_ALL_CODES = [
+  'system:admin',
+  'system:admin:create',
+  'system:admin:edit',
+  'system:admin:updateStatus',
+  'system:admin:resetPwd',
+  'system:role',
+  'system:role:create',
+  'system:role:edit',
+  'system:role:delete',
+  'system:rule',
+  'system:menu',
+  'system:menu:create',
+  'system:menu:edit',
+  'system:menu:delete',
+];
+
 export const MOCK_CODES = [
-  // super
+  // super — 拥有所有权限
   {
-    codes: ['AC_100100', 'AC_100110', 'AC_100120', 'AC_100010'],
+    codes: ['AC_100100', 'AC_100110', 'AC_100120', 'AC_100010', ...SYSTEM_ALL_CODES],
     username: 'vben',
   },
   {
-    // admin
-    codes: ['AC_100010', 'AC_100020', 'AC_100030'],
+    // admin — 拥有系统管理权限
+    codes: ['AC_100010', 'AC_100020', 'AC_100030', ...SYSTEM_ALL_CODES],
     username: 'admin',
   },
   {
-    // user
+    // user — 只读权限
     codes: ['AC_1000001', 'AC_1000002'],
     username: 'jack',
   },
