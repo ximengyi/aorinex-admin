@@ -155,12 +155,12 @@ function onAction(code: string, row: AdminApi.AdminItem) {
       </template>
 
       <template #operation="{ row }">
-        <ElButton link type="primary" @click="onAction('edit', row)">编辑</ElButton>
-        <ElButton link type="danger" @click="onAction('resetPwd', row)">重置密码</ElButton>
+        <ElButton v-access:code="'system:admin:edit'" link type="primary" @click="onAction('edit', row)">编辑</ElButton>
+        <ElButton v-access:code="'system:admin:resetPwd'" link type="danger" @click="onAction('resetPwd', row)">重置密码</ElButton>
       </template>
 
       <template #toolbar-tools>
-        <ElButton type="primary" @click="onCreate">
+        <ElButton v-access:code="'system:admin:create'" type="primary" @click="onCreate">
           <Plus class="size-5" />
           新建账号
         </ElButton>

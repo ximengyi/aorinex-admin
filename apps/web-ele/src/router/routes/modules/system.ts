@@ -1,11 +1,13 @@
 import type { RouteRecordRaw } from 'vue-router';
 
+import { $t } from '#/locales';
+
 const routes: RouteRecordRaw[] = [
   {
     meta: {
       icon: 'lucide:settings',
       order: 10,
-      title: '系统管理',
+      title: $t('page.system.title'),
     },
     name: 'System',
     path: '/system',
@@ -16,7 +18,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('#/views/system/admin/index.vue'),
         meta: {
           icon: 'lucide:users',
-          title: '账号管理',
+          title: $t('page.system.admin'),
         },
       },
       {
@@ -25,16 +27,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('#/views/system/role/index.vue'),
         meta: {
           icon: 'lucide:user-cog',
-          title: '角色管理',
-        },
-      },
-      {
-        name: 'SystemRule',
-        path: '/system/rule',
-        component: () => import('#/views/system/rule/index.vue'),
-        meta: {
-          icon: 'lucide:shield',
-          title: '权限规则',
+          title: $t('page.system.role'),
         },
       },
       {
@@ -43,7 +36,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('#/views/system/menu/index.vue'),
         meta: {
           icon: 'lucide:menu',
-          title: '菜单管理',
+          title: $t('page.system.menu'),
         },
       },
     ],

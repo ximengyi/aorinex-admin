@@ -145,14 +145,13 @@ async function toggleStatus(row: RoleApi.RoleItem) {
       <template #statusSlot="{ row }">
         <ElSwitch
           :model-value="row.status === 0"
-          active-text="启用"
           inactive-text="禁用"
           @change="() => toggleStatus(row)"
         />
       </template>
       <template #operation="{ row }">
-        <ElButton v-access:code="'system:role:edit'" link size="small" type="primary" @click="openEdit(row)">编辑</ElButton>
-        <ElButton v-access:code="'system:role:delete'" link size="small" type="danger" @click="handleDelete(row)">删除</ElButton>
+        <ElButton v-access:code="'system:role:edit'" link type="primary" @click="openEdit(row)">编辑</ElButton>
+        <ElButton v-access:code="'system:role:delete'" link type="danger" @click="handleDelete(row)">删除</ElButton>
       </template>
       <template #toolbar-tools>
         <ElButton v-access:code="'system:role:create'" type="primary" @click="openCreate">

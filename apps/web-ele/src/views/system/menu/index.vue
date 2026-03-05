@@ -6,7 +6,7 @@ import type { VxeGridProps } from '#/adapter/vxe-table';
 import { ref } from 'vue';
 
 import { Page, useVbenDrawer } from '@vben/common-ui';
-import { Plus } from '@vben/icons';
+import { IconifyIcon, Plus } from '@vben/icons';
 
 import { ElButton, ElMessage, ElMessageBox } from 'element-plus';
 
@@ -27,7 +27,7 @@ const editId = ref<number>();
 
 const formSchema: VbenFormSchema[] = [
   { component: 'Input', fieldName: 'title', label: '菜单标题', rules: 'required' },
-  { component: 'Input', fieldName: 'icon', label: '图标（lucide:xxx）' },
+  { component: 'IconPicker', fieldName: 'icon', label: '图标' },
   { component: 'Input', fieldName: 'path', label: '路由路径' },
   {
     component: 'InputNumber',
@@ -108,39 +108,50 @@ async function handleDelete(row: MenuApi.MenuItem) {
 }
 
 /* =================== 表格 =================== */
-/** 递归展开树结构为平铺列表，供表格展示 */
-function flattenTree(list: MenuApi.MenuItem[]): MenuApi.MenuItem[] {
-  return list.flatMap((item) => [
-    item,
-    ...(item.children ? flattenTree(item.children) : []),
-  ]);
-}
+const TYPE_MAP: Record<number, string> = { 0: '目录', 1: '菜单', 2: '按钮' };
 
 const gridOptions: VxeGridProps<MenuApi.MenuItem> = {
   columns: [
-    { field: 'id', title: 'ID', width: 80 },
-    { field: 'title', title: '标题', minWidth: 140 },
-    { field: 'icon', title: '图标', width: 120 },
-    { field: 'path', title: '路由路径', minWidth: 160 },
-    { field: 'pid', title: '父级ID', width: 80 },
-    { field: 'type', title: '类型(0目录/1菜单/2按钮)', width: 80 },
-    { field: 'weight', title: '排序', width: 70 },
-    { field: 'operation', title: '操作', width: 160, fixed: 'right', slots: { default: 'operation' } },
+    { field: 'id', title: 'ID', width: 70 },
+    {
+      field: 'title',
+      title: '标题',
+      minWidth: 200,
+      treeNode: true,
+      slots: { default: 'titleSlot' },
+    },
+    { field: 'path', title: '路由路径', minWidth: 180 },
+    {
+      field: 'type',
+      title: '类型',
+      width: 80,
+      formatter: ({ cellValue }) => TYPE_MAP[cellValue as number] ?? '-',
+    },
+    { field: 'weight', title: '排序', width: 60 },
+    { field: 'operation', title: '操作', width: 140, fixed: 'right', slots: { default: 'operation' } },
   ],
   height: 'auto',
   keepSource: true,
-  pagerConfig: {},
+  /** 树形菜单禁用分页 */
+  pagerConfig: { enabled: false },
   proxyConfig: {
     ajax: {
       query: async () => {
         const data = await getMenuTreeApi({ status: 0 });
-        const list = flattenTree(Array.isArray(data) ? data : []);
-        return { result: list, page: { total: list.length } };
+        /** 直接返回嵌套树，treeConfig.transform:false 时 vxe-table 按 children 渲染 */
+        return Array.isArray(data) ? data : [];
       },
     },
-    response: { result: 'result', total: 'page.total' },
   },
   rowConfig: { keyField: 'id' },
+  /** 树形配置：children 字段已在数据中，无需 transform */
+  treeConfig: {
+    rowField: 'id',
+    parentField: 'pid',
+    childrenField: 'children',
+    transform: false,
+    expandAll: true,
+  },
   toolbarConfig: { custom: true, refresh: true, zoom: true },
 };
 
@@ -153,9 +164,21 @@ const [Grid, gridApi] = useVbenVxeGrid({ gridOptions });
       <Form />
     </Drawer>
     <Grid table-title="菜单列表">
+      <!-- 标题列：图标 + 文字合并展示 -->
+      <template #titleSlot="{ row }">
+        <div class="flex items-center gap-2">
+          <IconifyIcon
+            v-if="row.icon"
+            :icon="row.icon"
+            class="size-4 flex-shrink-0 text-primary"
+          />
+          <span>{{ row.title }}</span>
+        </div>
+      </template>
+
       <template #operation="{ row }">
-        <ElButton v-access:code="'system:menu:edit'" link size="small" type="primary" @click="openEdit(row)">编辑</ElButton>
-        <ElButton v-access:code="'system:menu:delete'" link size="small" type="danger" @click="handleDelete(row)">删除</ElButton>
+        <ElButton v-access:code="'system:menu:edit'" link type="primary" @click="openEdit(row)">编辑</ElButton>
+        <ElButton v-access:code="'system:menu:delete'" link type="danger" @click="handleDelete(row)">删除</ElButton>
       </template>
       <template #toolbar-tools>
         <ElButton v-access:code="'system:menu:create'" type="primary" @click="openCreate">
