@@ -99,6 +99,32 @@ const SYSTEM_MENU_TREE = [
     ],
   },
   {
+    id: 4,
+    title: '用户管理',
+    icon: 'lucide:user-circle',
+    path: '/user',
+    pid: 0,
+    type: 0,
+    weight: 1,
+    children: [
+      {
+        id: 41,
+        title: 'C 端用户',
+        icon: 'lucide:smartphone',
+        path: '/user/end-user',
+        pid: 4,
+        type: 1,
+        weight: 1,
+        children: [
+          { id: 411, title: '新建用户', icon: '', path: '', pid: 41, type: 2, weight: 1, children: [] },
+          { id: 412, title: '编辑用户', icon: '', path: '', pid: 41, type: 2, weight: 2, children: [] },
+          { id: 413, title: '查看详情', icon: '', path: '', pid: 41, type: 2, weight: 3, children: [] },
+          { id: 414, title: '禁用用户', icon: '', path: '', pid: 41, type: 2, weight: 4, children: [] },
+        ],
+      },
+    ],
+  },
+  {
     id: 3,
     title: '演示',
     icon: 'lucide:flask-conical',

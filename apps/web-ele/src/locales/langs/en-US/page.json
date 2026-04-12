@@ -17,5 +17,9 @@
     "admin": "Accounts",
     "role": "Roles",
     "menu": "Menus"
+  },
+  "user": {
+    "title": "Users",
+    "endUser": "End users"
   }
 }

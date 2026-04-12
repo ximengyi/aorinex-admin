@@ -54,6 +54,11 @@ const SYSTEM_ALL_CODES = [
   'system:menu:create',
   'system:menu:edit',
   'system:menu:delete',
+  'user:end_user',
+  'user:end_user:create',
+  'user:end_user:edit',
+  'user:end_user:detail',
+  'user:end_user:disable',
 ];
 
 export const MOCK_CODES = [
