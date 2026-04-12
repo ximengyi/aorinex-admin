@@ -1,6 +1,6 @@
 /**
- * C 端用户 end_users
- * 约定：GET/POST {{base_url}}/api/user/end_user/* ，请求/响应字段 snake_case，统一 { code, msg, data }
+ * 用户管理（C 端用户表 user）
+ * 后端: /api/system/c_user/* ，字段 snake_case，统一 { code, msg, data }
  */
 import { requestClient } from '#/api/request';
 
@@ -69,34 +69,44 @@ export namespace EndUserApi {
   }
 }
 
-/** 列表 GET /api/user/end_user/list */
-export async function getEndUserListApi(params: EndUserApi.EndUserListParams) {
-  const data = await requestClient.get<any>('/user/end_user/list', { params });
+function normalizeListPayload(data: any): EndUserApi.EndUserListResult {
   if (Array.isArray(data)) {
     return { list: data as EndUserApi.EndUserItem[], total: data.length };
   }
   const list: EndUserApi.EndUserItem[] = data?.list ?? data?.items ?? [];
-  return { list, total: (data?.total as number) ?? list.length };
+  const total =
+    typeof data?.total === 'number'
+      ? data.total
+      : typeof data?.pagination?.total === 'number'
+        ? data.pagination.total
+        : list.length;
+  return { list, total };
 }
 
-/** 详情 GET /api/user/end_user/detail */
+/** 列表 GET /api/system/c_user/list */
+export async function getEndUserListApi(params: EndUserApi.EndUserListParams) {
+  const data = await requestClient.get<any>('/system/c_user/list', { params });
+  return normalizeListPayload(data);
+}
+
+/** 详情 GET /api/system/c_user/detail */
 export async function getEndUserDetailApi(id: number) {
-  return requestClient.get<EndUserApi.EndUserItem>('/user/end_user/detail', {
+  return requestClient.get<EndUserApi.EndUserItem>('/system/c_user/detail', {
     params: { id },
   });
 }
 
-/** 创建 POST /api/user/end_user/create */
+/** 创建 POST /api/system/c_user/create */
 export async function createEndUserApi(data: EndUserApi.EndUserCreateParams) {
-  return requestClient.post<unknown>('/user/end_user/create', data);
+  return requestClient.post<unknown>('/system/c_user/create', data);
 }
 
-/** 更新 POST /api/user/end_user/update */
+/** 更新 POST /api/system/c_user/update */
 export async function updateEndUserApi(data: EndUserApi.EndUserUpdateParams) {
-  return requestClient.post<unknown>('/user/end_user/update', data);
+  return requestClient.post<unknown>('/system/c_user/update', data);
 }
 
-/** 启用/禁用 POST /api/user/end_user/updateStatus */
+/** 启用/禁用 POST /api/system/c_user/updateStatus */
 export async function updateEndUserStatusApi(data: EndUserApi.EndUserUpdateStatusParams) {
-  return requestClient.post<unknown>('/user/end_user/updateStatus', data);
+  return requestClient.post<unknown>('/system/c_user/updateStatus', data);
 }

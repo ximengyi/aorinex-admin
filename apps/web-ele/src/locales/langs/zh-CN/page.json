@@ -19,7 +19,7 @@
     "menu": "菜单管理"
   },
   "user": {
-    "title": "用户管理",
-    "endUser": "C 端用户"
+    "title": "用户中心",
+    "endUser": "用户管理"
   }
 }

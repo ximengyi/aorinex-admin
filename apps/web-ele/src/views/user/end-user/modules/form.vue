@@ -105,11 +105,18 @@ async function handleConfirm() {
       const payload: EndUserApi.EndUserUpdateParams = { ...values, id };
       if (!payload.password) {
         delete (payload as Recordable).password;
+      } else if (String(payload.password).length < 6) {
+        ElMessage.warning('密码至少 6 位');
+        return;
       }
       await updateEndUserApi(payload);
     } else {
       if (!values.password) {
         ElMessage.warning('请填写初始密码');
+        return;
+      }
+      if (String(values.password).length < 6) {
+        ElMessage.warning('密码至少 6 位');
         return;
       }
       await createEndUserApi(values as EndUserApi.EndUserCreateParams);

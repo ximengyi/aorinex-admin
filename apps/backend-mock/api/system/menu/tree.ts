@@ -100,7 +100,7 @@ const SYSTEM_MENU_TREE = [
   },
   {
     id: 4,
-    title: '用户管理',
+    title: '用户中心',
     icon: 'lucide:user-circle',
     path: '/user',
     pid: 0,
@@ -109,7 +109,7 @@ const SYSTEM_MENU_TREE = [
     children: [
       {
         id: 41,
-        title: 'C 端用户',
+        title: '用户管理',
         icon: 'lucide:smartphone',
         path: '/user/end-user',
         pid: 4,

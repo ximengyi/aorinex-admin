@@ -196,7 +196,7 @@ async function disableFromDetail() {
 
 <template>
   <Page auto-content-height :title="$t('page.user.endUser')">
-    <FormDrawer :title="editData.id ? '编辑 C 端用户' : '新建 C 端用户'">
+    <FormDrawer :title="editData.id ? '编辑用户' : '新建用户'">
       <EndUserForm
         :drawer-api="formDrawerApi as any"
         :initial-data="editData"
@@ -235,7 +235,7 @@ async function disableFromDetail() {
       </div>
     </DetailDrawer>
 
-    <Grid table-title="C 端用户列表">
+    <Grid table-title="用户列表">
       <template #statusSlot="{ row }">
         <ElSwitch
           :model-value="row.status === 1"
