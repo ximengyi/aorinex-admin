@@ -5,14 +5,21 @@
 import { requestClient } from '#/api/request';
 
 export namespace RuleApi {
+  /** 列表项与 ax_rules 对齐；简述字段后端为 icon */
   export interface RuleItem {
     id: number;
     title: string;
     summary?: string;
+    icon?: string;
     pid: number;
     href?: string;
+    path?: string;
+    frontend_path?: string;
+    api_path?: string;
+    access_code?: string;
     type?: number;
     weight?: number;
+    status?: number;
     created_at?: string;
     updated_at?: string;
   }
@@ -34,9 +41,15 @@ export namespace RuleApi {
     summary?: string;
     pid?: number;
     href?: string;
+    path?: string;
+    frontend_path?: string;
+    api_path?: string;
+    access_code?: string;
     type?: number;
     weight?: number;
   }
+
+  export type RuleCreateParams = Omit<RuleUpdateParams, 'id'> & { title: string };
 }
 
 /** 权限规则列表；兼容 { list, total }（真实后端）/ { items, total }（Mock）/ 数组 */
@@ -46,7 +59,14 @@ export async function getRuleListApi(params: RuleApi.RuleListParams) {
     return { list: data as RuleApi.RuleItem[], total: data.length };
   }
   const list: RuleApi.RuleItem[] = data?.list ?? data?.items ?? [];
-  return { list, total: (data?.total as number) ?? list.length };
+  const total =
+    (data?.pagination?.total as number) ?? (data?.total as number) ?? list.length;
+  return { list, total };
+}
+
+/** 新建权限规则 POST /api/system/rule/create */
+export async function createRuleApi(data: RuleApi.RuleCreateParams) {
+  return requestClient.post<unknown>('/system/rule/create', data);
 }
 
 /** 更新权限规则 POST /api/system/rule/update */

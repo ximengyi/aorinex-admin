@@ -13,8 +13,16 @@ const gridOptions: VxeGridProps<RuleApi.RuleItem> = {
   columns: [
     { field: 'id', title: 'ID', width: 80 },
     { field: 'title', title: '标题', width: 140 },
-    { field: 'summary', title: '描述', minWidth: 120 },
-    { field: 'href', title: '接口/路径', minWidth: 180 },
+    {
+      field: 'icon',
+      title: '简述',
+      width: 100,
+      formatter: ({ row }) => (row as RuleApi.RuleItem).summary || (row as RuleApi.RuleItem).icon || '-',
+    },
+    { field: 'path', title: '兼容 path', minWidth: 120 },
+    { field: 'frontend_path', title: '前端路由', minWidth: 120 },
+    { field: 'api_path', title: '接口前缀', minWidth: 120 },
+    { field: 'access_code', title: '权限码', minWidth: 130 },
     { field: 'type', title: '类型', width: 80 },
     { field: 'weight', title: '排序', width: 80 },
   ],

@@ -30,6 +30,18 @@ const formSchema: VbenFormSchema[] = [
   { component: 'IconPicker', fieldName: 'icon', label: '图标' },
   { component: 'Input', fieldName: 'path', label: '路由路径' },
   {
+    component: 'Input',
+    fieldName: 'api_path',
+    label: '接口前缀',
+    componentProps: { placeholder: '如 /api/system，供后端鉴权前缀匹配' },
+  },
+  {
+    component: 'Input',
+    fieldName: 'access_code',
+    label: '权限码',
+    componentProps: { placeholder: '如 system:menu:edit，供 v-access 与 /auth/codes' },
+  },
+  {
     component: 'InputNumber',
     fieldName: 'pid',
     label: '父级 ID（0为根）',
@@ -120,7 +132,9 @@ const gridOptions: VxeGridProps<MenuApi.MenuItem> = {
       treeNode: true,
       slots: { default: 'titleSlot' },
     },
-    { field: 'path', title: '路由路径', minWidth: 180 },
+    { field: 'path', title: '路由路径', minWidth: 140 },
+    { field: 'api_path', title: '接口前缀', minWidth: 120 },
+    { field: 'access_code', title: '权限码', minWidth: 140 },
     {
       field: 'type',
       title: '类型',
