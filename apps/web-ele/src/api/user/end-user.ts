@@ -25,7 +25,8 @@ export namespace EndUserApi {
   export interface EndUserListParams {
     page?: number;
     per_page?: number;
-    mobile?: string;
+    /** 手机号 / 昵称 / 邮箱等模糊匹配 */
+    keyword?: string;
     /** 1 正常 2 禁用 */
     status?: string;
     created_start?: string;

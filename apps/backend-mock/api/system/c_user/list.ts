@@ -9,12 +9,20 @@ export default eventHandler(async (event) => {
     return unAuthorizedResponse(event);
   }
 
-  const { page = 1, per_page = 10, mobile, status, created_start, created_end } = getQuery(event);
+  const { page = 1, per_page = 10, keyword, status, created_start, created_end } = getQuery(event);
 
   let listData = structuredClone(endUserMockStore.rows);
 
-  if (mobile) {
-    listData = listData.filter((item) => item.mobile.includes(String(mobile)));
+  if (keyword) {
+    const k = String(keyword).toLowerCase();
+    listData = listData.filter((item) => {
+      const email = item.email ? String(item.email).toLowerCase() : '';
+      return (
+        item.mobile.includes(String(keyword)) ||
+        item.nickname.toLowerCase().includes(k) ||
+        email.includes(k)
+      );
+    });
   }
   if (status === '1' || status === '2') {
     listData = listData.filter((item) => item.status === Number(status));

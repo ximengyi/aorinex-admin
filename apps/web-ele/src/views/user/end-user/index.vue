@@ -52,7 +52,15 @@ function genderLabel(g: number) {
 
 const formOptions = {
   schema: [
-    { component: 'Input', fieldName: 'mobile', label: '手机号' },
+    {
+      component: 'Input',
+      fieldName: 'keyword',
+      label: '关键词',
+      componentProps: {
+        placeholder: '手机号、昵称、邮箱',
+        clearable: true,
+      },
+    },
     {
       component: 'Select',
       fieldName: 'status',
