@@ -17,6 +17,10 @@ import {
   loginByCodeApi,
   logoutApi,
 } from '#/api';
+import {
+  ROLES_WITH_FULL_SYSTEM_CODES_WHEN_CODES_EMPTY,
+  SYSTEM_MANAGEMENT_ACCESS_CODES,
+} from '#/constants/system-access-codes';
 import { $t } from '#/locales';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -39,7 +43,16 @@ export const useAuthStore = defineStore('auth', () => {
     ]);
     const userInfo = fetchUserInfoResult;
     userStore.setUserInfo(userInfo);
-    accessStore.setAccessCodes(accessCodes);
+    /** 后端未返回权限码时，super/admin 角色使用内置系统管理码，避免按钮被 v-access 全部移除 */
+    const roles = userInfo?.roles ?? [];
+    const shouldUseFallback =
+      accessCodes.length === 0 &&
+      roles.some((r) =>
+        (ROLES_WITH_FULL_SYSTEM_CODES_WHEN_CODES_EMPTY as readonly string[]).includes(r),
+      );
+    accessStore.setAccessCodes(
+      shouldUseFallback ? [...SYSTEM_MANAGEMENT_ACCESS_CODES] : accessCodes,
+    );
     if (accessStore.loginExpired) {
       accessStore.setLoginExpired(false);
     } else {

@@ -10,8 +10,6 @@ import { Plus } from '@vben/icons';
 
 import { ElButton, ElMessage, ElMessageBox, ElSwitch } from 'element-plus';
 
-import { useAccess } from '#/composables/use-access';
-
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
   getAdminListApi,
@@ -82,7 +80,6 @@ const gridOptions: VxeGridProps<AdminApi.AdminItem> = {
 };
 
 const [Grid, gridApi] = useVbenVxeGrid({ formOptions, gridOptions });
-const { hasCode } = useAccess();
 
 function onRefresh() {
   gridApi.query();

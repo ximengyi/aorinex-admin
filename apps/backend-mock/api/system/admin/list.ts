@@ -10,7 +10,7 @@ function generateMockDataList(count: number) {
   for (let i = 0; i < count; i++) {
     dataList.push({
       id: i + 1,
-      username: faker.internet.userName(),
+      username: faker.internet.username(),
       name: faker.person.fullName(),
       mobile: `1${faker.string.numeric(10)}`,
       email: faker.internet.email(),

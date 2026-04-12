@@ -72,8 +72,28 @@ export async function logoutApi() {
 }
 
 /**
+ * 解析后端返回的权限码列表（兼容 data 为数组，或 { codes } / { permissions }）
+ */
+function normalizeAccessCodesPayload(raw: unknown): string[] {
+  if (Array.isArray(raw)) {
+    return raw.filter((x): x is string => typeof x === 'string');
+  }
+  if (raw && typeof raw === 'object') {
+    const o = raw as Record<string, unknown>;
+    if (Array.isArray(o.codes)) {
+      return o.codes.filter((x): x is string => typeof x === 'string');
+    }
+    if (Array.isArray(o.permissions)) {
+      return o.permissions.filter((x): x is string => typeof x === 'string');
+    }
+  }
+  return [];
+}
+
+/**
  * 获取用户权限码
  */
 export async function getAccessCodesApi() {
-  return requestClient.get<string[]>('/auth/codes');
+  const raw = await requestClient.get<unknown>('/auth/codes');
+  return normalizeAccessCodesPayload(raw);
 }
