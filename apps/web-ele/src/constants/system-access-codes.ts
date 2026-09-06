@@ -17,6 +17,8 @@ export const SYSTEM_MANAGEMENT_ACCESS_CODES = [
   'system:menu:create',
   'system:menu:edit',
   'system:menu:delete',
+  'system:settings',
+  'system:settings:edit',
   'user:end_user',
   'user:end_user:create',
   'user:end_user:edit',

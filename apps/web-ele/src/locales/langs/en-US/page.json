@@ -16,7 +16,8 @@
     "title": "System",
     "admin": "Accounts",
     "role": "Roles",
-    "menu": "Menus"
+    "menu": "Menus",
+    "settings": "Settings"
   },
   "user": {
     "title": "Users",

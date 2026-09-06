@@ -53,6 +53,16 @@ export const useAuthStore = defineStore('auth', () => {
     accessStore.setAccessCodes(
       shouldUseFallback ? [...SYSTEM_MANAGEMENT_ACCESS_CODES] : accessCodes,
     );
+    try {
+      const { getSiteSettingsApi } = await import('#/api/system/settings');
+      const { applySiteSettingsToPreferences } = await import(
+        '#/utils/site-settings'
+      );
+      const siteSettings = await getSiteSettingsApi();
+      await applySiteSettingsToPreferences(siteSettings);
+    } catch {
+      // 站点设置拉取失败不阻断登录
+    }
     if (accessStore.loginExpired) {
       accessStore.setLoginExpired(false);
     } else {

@@ -39,6 +39,15 @@ const routes: RouteRecordRaw[] = [
           title: $t('page.system.menu'),
         },
       },
+      {
+        name: 'SystemSettings',
+        path: '/system/settings',
+        component: () => import('#/views/system/settings/index.vue'),
+        meta: {
+          icon: 'lucide:sliders-horizontal',
+          title: $t('page.system.settings'),
+        },
+      },
     ],
   },
 ];

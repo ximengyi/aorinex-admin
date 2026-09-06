@@ -26,6 +26,10 @@ export default defineConfig(async (config) => {
             target: proxyTarget,
             ws: true,
           },
+          '/uploads': {
+            changeOrigin: true,
+            target: proxyTarget,
+          },
         },
       },
     },
