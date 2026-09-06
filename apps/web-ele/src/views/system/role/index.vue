@@ -39,8 +39,8 @@ const [Form, formApi] = useForm({ schema: formSchema, showDefaultActions: false 
 
 const [Modal, modalApi] = useVbenModal({
   centered: true,
-  class: 'w-[780px]',
-  contentClass: 'overflow-visible',
+  class: 'w-[1170px] max-w-[95vw]',
+  contentClass: 'min-h-[640px]',
   async onConfirm() {
     const { valid } = await formApi.validate();
     if (!valid) return;

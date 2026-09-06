@@ -105,17 +105,19 @@ function isPanelVisible(level: number) {
       </span>
     </div>
 
-    <div class="permission-panel__body relative flex gap-2">
-      <!-- 一级默认展示；二级及更深级在悬停时出现 -->
+    <div class="permission-panel__body">
+      <!-- 预留三级列宽，保证三级菜单始终可见 -->
       <div
-        v-for="level in hoverPath.length + 1"
+        v-for="level in Math.max(hoverPath.length + 1, 3)"
         :key="level - 1"
-        v-show="isPanelVisible(level - 1)"
         class="permission-panel__column"
-        :class="level === 1 ? 'permission-panel__column--root' : ''"
+        :class="{
+          'permission-panel__column--empty':
+            level > 1 && !isPanelVisible(level - 1),
+        }"
       >
-        <ElScrollbar max-height="320px">
-          <div class="flex flex-col gap-2 pr-1">
+        <ElScrollbar height="480px">
+          <div v-if="isPanelVisible(level - 1)" class="flex flex-col gap-1.5">
             <div
               v-for="node in panelNodes(level - 1)"
               :key="node.value"
@@ -140,6 +142,16 @@ function isPanelVisible(level: number) {
               />
             </div>
           </div>
+          <div
+            v-else
+            class="text-muted-foreground flex h-[480px] items-center justify-center px-2 text-center text-xs leading-5"
+          >
+            {{
+              level === 2
+                ? '悬停左侧带箭头项查看二级'
+                : '悬停二级带箭头项查看三级'
+            }}
+          </div>
         </ElScrollbar>
       </div>
     </div>
@@ -150,35 +162,39 @@ function isPanelVisible(level: number) {
 .permission-panel {
   border: 1px solid hsl(var(--border));
   border-radius: 8px;
-  padding: 12px;
+  padding: 10px 12px;
   background: hsl(var(--background));
+  min-height: 560px;
 }
 
 .permission-panel__body {
-  align-items: flex-start;
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  min-height: 480px;
 }
 
 .permission-panel__column {
-  min-width: 220px;
-  max-width: 280px;
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   border: 1px solid hsl(var(--border));
   border-radius: 8px;
-  padding: 8px;
+  padding: 6px;
   background: hsl(var(--muted) / 0.35);
+  height: 496px;
+  box-sizing: border-box;
 }
 
-.permission-panel__column--root {
-  flex: 1.2;
-  max-width: none;
+.permission-panel__column--empty {
+  background: hsl(var(--muted) / 0.2);
 }
 
 .permission-panel__item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: 8px;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 6px;
   border: 1px solid hsl(var(--border));
   background: hsl(var(--background));
   cursor: default;
