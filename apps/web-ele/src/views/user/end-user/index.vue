@@ -5,7 +5,7 @@ import type { VxeGridProps } from '#/adapter/vxe-table';
 
 import { ref } from 'vue';
 
-import { Page, useVbenDrawer } from '@vben/common-ui';
+import { Page, useVbenModal } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
 import {
@@ -32,16 +32,21 @@ defineOptions({ name: 'UserEndUser' });
 const editData = ref<Partial<EndUserApi.EndUserItem>>({});
 const detailData = ref<EndUserApi.EndUserItem | null>(null);
 
-const [FormDrawer, formDrawerApi] = useVbenDrawer({
+const [FormModal, formModalApi] = useVbenModal({
+  centered: true,
+  class: 'w-[560px]',
   destroyOnClose: true,
+  footer: false,
   onOpenChange(isOpen) {
-    if (isOpen) editData.value = (formDrawerApi as any).getData() ?? {};
+    if (isOpen) editData.value = (formModalApi as any).getData() ?? {};
   },
 });
 
-const [DetailDrawer, detailDrawerApi] = useVbenDrawer({
+const [DetailModal, detailModalApi] = useVbenModal({
+  centered: true,
+  class: 'w-[560px]',
   destroyOnClose: true,
-  class: 'w-[520px]',
+  footer: false,
 });
 
 function genderLabel(g: number) {
@@ -144,25 +149,25 @@ function onRefresh() {
 }
 
 function onFormSuccess() {
-  formDrawerApi.close();
+  formModalApi.close();
   onRefresh();
 }
 
 function onCreate() {
-  (formDrawerApi as any).setData({}).open();
+  (formModalApi as any).setData({}).open();
 }
 
 function openEdit(row: EndUserApi.EndUserItem) {
-  (formDrawerApi as any).setData({ ...row }).open();
+  (formModalApi as any).setData({ ...row }).open();
 }
 
 async function openDetail(row: EndUserApi.EndUserItem) {
-  detailDrawerApi.open();
+  detailModalApi.open();
   detailData.value = null;
   try {
     detailData.value = await getEndUserDetailApi(row.id);
   } catch {
-    detailDrawerApi.close();
+    detailModalApi.close();
   }
 }
 
@@ -204,15 +209,15 @@ async function disableFromDetail() {
 
 <template>
   <Page auto-content-height :title="$t('page.user.endUser')">
-    <FormDrawer :title="editData.id ? '编辑用户' : '新建用户'">
+    <FormModal :title="editData.id ? '编辑用户' : '新建用户'">
       <EndUserForm
-        :drawer-api="formDrawerApi as any"
+        :modal-api="formModalApi as any"
         :initial-data="editData"
         @success="onFormSuccess"
       />
-    </FormDrawer>
+    </FormModal>
 
-    <DetailDrawer title="用户详情">
+    <DetailModal title="用户详情">
       <div v-if="detailData" class="flex flex-col gap-4">
         <ElDescriptions :column="1" border>
           <ElDescriptionsItem label="ID">{{ detailData.id }}</ElDescriptionsItem>
@@ -241,7 +246,7 @@ async function disableFromDetail() {
           </ElButton>
         </div>
       </div>
-    </DetailDrawer>
+    </DetailModal>
 
     <Grid table-title="用户列表">
       <template #statusSlot="{ row }">

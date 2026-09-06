@@ -5,7 +5,7 @@ import type { VxeGridProps } from '#/adapter/vxe-table';
 
 import { ref } from 'vue';
 
-import { Page, useVbenDrawer } from '@vben/common-ui';
+import { Page, useVbenModal } from '@vben/common-ui';
 import { IconifyIcon, Plus } from '@vben/icons';
 
 import { ElButton, ElMessage, ElMessageBox } from 'element-plus';
@@ -72,12 +72,14 @@ const formSchema: VbenFormSchema[] = [
 
 const [Form, formApi] = useForm({ schema: formSchema, showDefaultActions: false });
 
-const [Drawer, drawerApi] = useVbenDrawer({
+const [Modal, modalApi] = useVbenModal({
+  centered: true,
+  class: 'w-[560px]',
   async onConfirm() {
     const { valid } = await formApi.validate();
     if (!valid) return;
     const values = await formApi.getValues();
-    drawerApi.lock();
+    modalApi.lock();
     try {
       if (isEdit.value && editId.value) {
         await updateMenuApi({ id: editId.value, ...values } as MenuApi.MenuUpdateParams);
@@ -87,9 +89,9 @@ const [Drawer, drawerApi] = useVbenDrawer({
         ElMessage.success('创建成功');
       }
       gridApi.query();
-      drawerApi.close();
+      modalApi.close();
     } finally {
-      drawerApi.unlock();
+      modalApi.unlock();
     }
   },
 });
@@ -98,14 +100,14 @@ function openCreate() {
   isEdit.value = false;
   editId.value = undefined;
   formApi.resetForm();
-  drawerApi.open();
+  modalApi.open();
 }
 
 function openEdit(row: MenuApi.MenuItem) {
   isEdit.value = true;
   editId.value = row.id;
   formApi.setValues(row as any);
-  drawerApi.open();
+  modalApi.open();
 }
 
 async function handleDelete(row: MenuApi.MenuItem) {
@@ -174,9 +176,9 @@ const [Grid, gridApi] = useVbenVxeGrid({ gridOptions });
 
 <template>
   <Page auto-content-height title="菜单管理">
-    <Drawer :title="isEdit ? '编辑菜单' : '新建菜单'">
+    <Modal :title="isEdit ? '编辑菜单' : '新建菜单'">
       <Form />
-    </Drawer>
+    </Modal>
     <Grid table-title="菜单列表">
       <!-- 标题列：图标 + 文字合并展示 -->
       <template #titleSlot="{ row }">

@@ -5,7 +5,7 @@ import type { VxeGridProps } from '#/adapter/vxe-table';
 
 import { ref } from 'vue';
 
-import { Page, useVbenDrawer } from '@vben/common-ui';
+import { Page, useVbenModal } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
 import { ElButton, ElMessage, ElMessageBox, ElSwitch } from 'element-plus';
@@ -23,7 +23,7 @@ import { useVbenForm as useForm } from '#/adapter/form';
 
 defineOptions({ name: 'SystemRole' });
 
-/* =================== 新建 / 编辑 Drawer =================== */
+/* =================== 新建 / 编辑 Modal =================== */
 const isEdit = ref(false);
 const editId = ref<number>();
 
@@ -47,12 +47,14 @@ const formSchema: VbenFormSchema[] = [
 
 const [Form, formApi] = useForm({ schema: formSchema, showDefaultActions: false });
 
-const [Drawer, drawerApi] = useVbenDrawer({
+const [Modal, modalApi] = useVbenModal({
+  centered: true,
+  class: 'w-[560px]',
   async onConfirm() {
     const { valid } = await formApi.validate();
     if (!valid) return;
     const values = await formApi.getValues();
-    drawerApi.lock();
+    modalApi.lock();
     try {
       if (isEdit.value && editId.value) {
         await updateRoleApi({ id: editId.value, ...values } as RoleApi.RoleUpdateParams);
@@ -62,9 +64,9 @@ const [Drawer, drawerApi] = useVbenDrawer({
         ElMessage.success('创建成功');
       }
       gridApi.query();
-      drawerApi.close();
+      modalApi.close();
     } finally {
-      drawerApi.unlock();
+      modalApi.unlock();
     }
   },
 });
@@ -73,14 +75,14 @@ function openCreate() {
   isEdit.value = false;
   editId.value = undefined;
   formApi.resetForm();
-  drawerApi.open();
+  modalApi.open();
 }
 
 function openEdit(row: RoleApi.RoleItem) {
   isEdit.value = true;
   editId.value = row.id;
   formApi.setValues(row as any);
-  drawerApi.open();
+  modalApi.open();
 }
 
 async function handleDelete(row: RoleApi.RoleItem) {
@@ -138,9 +140,9 @@ async function toggleStatus(row: RoleApi.RoleItem) {
 
 <template>
   <Page auto-content-height title="角色管理">
-    <Drawer :title="isEdit ? '编辑角色' : '新建角色'">
+    <Modal :title="isEdit ? '编辑角色' : '新建角色'">
       <Form />
-    </Drawer>
+    </Modal>
     <Grid table-title="角色列表">
       <template #statusSlot="{ row }">
         <ElSwitch

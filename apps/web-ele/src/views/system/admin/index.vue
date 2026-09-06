@@ -5,7 +5,7 @@ import type { VxeGridProps } from '#/adapter/vxe-table';
 
 import { ref } from 'vue';
 
-import { Page, useVbenDrawer } from '@vben/common-ui';
+import { Page, useVbenModal } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
 import { ElButton, ElMessage, ElMessageBox, ElSwitch } from 'element-plus';
@@ -22,10 +22,13 @@ import AdminForm from './modules/form.vue';
 defineOptions({ name: 'SystemAdmin' });
 
 const editData = ref<Partial<AdminApi.AdminItem>>({});
-const [FormDrawer, formDrawerApi] = useVbenDrawer({
+const [FormModal, formModalApi] = useVbenModal({
+  centered: true,
+  class: 'w-[560px]',
   destroyOnClose: true,
+  footer: false,
   onOpenChange(isOpen) {
-    if (isOpen) editData.value = (formDrawerApi as any).getData() ?? {};
+    if (isOpen) editData.value = (formModalApi as any).getData() ?? {};
   },
 });
 
@@ -86,16 +89,16 @@ function onRefresh() {
 }
 
 function onFormSuccess() {
-  formDrawerApi.close();
+  formModalApi.close();
   onRefresh();
 }
 
 function onCreate() {
-  (formDrawerApi as any).setData({}).open();
+  (formModalApi as any).setData({}).open();
 }
 
 function openEdit(row: AdminApi.AdminItem) {
-  (formDrawerApi as any).setData({ ...row }).open();
+  (formModalApi as any).setData({ ...row }).open();
 }
 
 /** 切换启用/禁用状态 */
@@ -134,13 +137,13 @@ function onAction(code: string, row: AdminApi.AdminItem) {
 
 <template>
   <Page auto-content-height title="账号管理">
-    <FormDrawer :title="editData.id ? '编辑账号' : '新建账号'">
+    <FormModal :title="editData.id ? '编辑账号' : '新建账号'">
       <AdminForm
-        :drawer-api="formDrawerApi as any"
+        :modal-api="formModalApi as any"
         :initial-data="editData"
         @success="onFormSuccess"
       />
-    </FormDrawer>
+    </FormModal>
     <Grid table-title="账号列表">
       <!-- 状态列：用 ElSwitch 展示 + 快速切换 -->
       <template #statusSlot="{ row }">

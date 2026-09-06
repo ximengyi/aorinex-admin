@@ -24,10 +24,11 @@ async function bootstrap(namespace: string) {
   // 初始化表单组件
   await initSetupVbenForm();
 
-  // // 设置弹窗的默认配置
-  // setDefaultModalProps({
-  //   fullscreenButton: false,
-  // });
+  // 设置弹窗默认居中，新增/编辑统一用 Modal 而非右侧抽屉
+  const { setDefaultModalProps } = await import('@vben/common-ui');
+  setDefaultModalProps({
+    centered: true,
+  });
   // // 设置抽屉的默认配置
   // setDefaultDrawerProps({
   //   zIndex: 2000,

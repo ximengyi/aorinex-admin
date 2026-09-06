@@ -92,7 +92,22 @@ const menus = computed(() => [
 ]);
 
 const avatar = computed(() => {
-  return userStore.userInfo?.avatar ?? preferences.app.defaultAvatar;
+  return userStore.userInfo?.avatar || preferences.app.defaultAvatar;
+});
+
+/** 下拉展示名：优先真实姓名，否则用户名 */
+const userDisplayName = computed(() => {
+  const info = userStore.userInfo;
+  return info?.realName || info?.username || '';
+});
+
+/** 下拉副标题：优先邮箱，其次手机号，再次用户名 */
+const userDescription = computed(() => {
+  const info = userStore.userInfo;
+  if (!info) {
+    return '';
+  }
+  return info.email || info.mobile || info.username || '';
 });
 
 async function handleLogout() {
@@ -145,9 +160,8 @@ watch(
       <UserDropdown
         :avatar
         :menus
-        :text="userStore.userInfo?.realName"
-        description="ann.vben@gmail.com"
-        tag-text="Pro"
+        :text="userDisplayName"
+        :description="userDescription"
         @logout="handleLogout"
       />
     </template>

@@ -7,10 +7,17 @@ interface UserInfo extends BasicUserInfo {
    */
   desc: string;
   /**
+   * 邮箱
+   */
+  email?: string;
+  /**
    * 首页地址
    */
   homePath: string;
-
+  /**
+   * 手机号
+   */
+  mobile?: string;
   /**
    * accessToken
    */

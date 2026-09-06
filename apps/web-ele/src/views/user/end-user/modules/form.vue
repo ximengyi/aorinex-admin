@@ -11,7 +11,7 @@ import { useVbenForm as useForm } from '#/adapter/form';
 import { createEndUserApi, updateEndUserApi } from '#/api/user/end-user';
 
 const props = defineProps<{
-  drawerApi?: { close: () => void; lock: () => void; unlock: () => void };
+  modalApi?: { close: () => void; lock: () => void; unlock: () => void };
   initialData?: Partial<EndUserApi.EndUserItem> | Record<string, never>;
 }>();
 
@@ -99,7 +99,7 @@ async function handleConfirm() {
   if (!valid) return;
   const values = await formApi.getValues();
   const id = (props.initialData as EndUserApi.EndUserItem)?.id;
-  props.drawerApi?.lock();
+  props.modalApi?.lock();
   try {
     if (id) {
       const payload: EndUserApi.EndUserUpdateParams = { ...values, id };
@@ -123,9 +123,9 @@ async function handleConfirm() {
     }
     ElMessage.success(id ? '保存成功' : '创建成功');
     emit('success');
-    props.drawerApi?.close();
+    props.modalApi?.close();
   } finally {
-    props.drawerApi?.unlock();
+    props.modalApi?.unlock();
   }
 }
 </script>
@@ -134,7 +134,7 @@ async function handleConfirm() {
   <div class="flex flex-col gap-4">
     <Form />
     <div class="flex justify-end gap-2">
-      <ElButton @click="drawerApi?.close()">取消</ElButton>
+      <ElButton @click="modalApi?.close()">取消</ElButton>
       <ElButton type="primary" @click="handleConfirm">
         {{ (initialData as EndUserApi.EndUserItem)?.id ? '保存' : '创建' }}
       </ElButton>
