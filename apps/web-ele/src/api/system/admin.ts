@@ -1,6 +1,6 @@
 /**
  * 系统管理 - 账号（管理员）接口
- * 后端: POST/GET {{base_url}}/api/system/admin/*
+ * 后端 RESTful: /api/system/admins
  */
 import { requestClient } from '#/api/request';
 
@@ -59,14 +59,9 @@ export namespace AdminApi {
   }
 }
 
-/** 账号列表 GET /api/system/admin/list
- * 兼容两种响应格式：
- *   - 真实后端: { list: [], total: n }
- *   - Mock server: { items: [], total: n }
- *   - 直接数组: []
- */
+/** 账号列表 GET /api/system/admins */
 export async function getAdminListApi(params: AdminApi.AdminListParams) {
-  const data = await requestClient.get<any>('/system/admin/list', { params });
+  const data = await requestClient.get<any>('/system/admins', { params });
   if (Array.isArray(data)) {
     return { list: data as AdminApi.AdminItem[], total: data.length };
   }
@@ -74,22 +69,27 @@ export async function getAdminListApi(params: AdminApi.AdminListParams) {
   return { list, total: (data?.total as number) ?? list.length };
 }
 
-/** 创建账号 POST /api/system/admin/create */
+/** 创建账号 POST /api/system/admins */
 export async function createAdminApi(data: AdminApi.AdminCreateParams) {
-  return requestClient.post<unknown>('/system/admin/create', data);
+  return requestClient.post<unknown>('/system/admins', data);
 }
 
-/** 更新账号 POST /api/system/admin/update */
+/** 更新账号 PUT /api/system/admins/{id} */
 export async function updateAdminApi(data: AdminApi.AdminUpdateParams) {
-  return requestClient.post<unknown>('/system/admin/update', data);
+  const { id, ...body } = data;
+  return requestClient.put<unknown>(`/system/admins/${id}`, body);
 }
 
-/** 启用/禁用账号 POST /api/system/admin/updateStatus */
+/** 启用/禁用账号 PATCH /api/system/admins/{id} */
 export async function updateAdminStatusApi(data: AdminApi.AdminUpdateStatusParams) {
-  return requestClient.post<unknown>('/system/admin/updateStatus', data);
+  const { id, status } = data;
+  return requestClient.request<unknown>(`/system/admins/${id}`, {
+    data: { status },
+    method: 'PATCH',
+  });
 }
 
-/** 重置密码 POST /api/system/admin/resetPassword */
+/** 重置密码 POST /api/system/admins/{id}/password-reset */
 export async function resetAdminPasswordApi(id: number) {
-  return requestClient.post<unknown>('/system/admin/resetPassword', { id });
+  return requestClient.post<unknown>(`/system/admins/${id}/password-reset`, {});
 }

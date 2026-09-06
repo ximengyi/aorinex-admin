@@ -16,6 +16,8 @@ function normalizeUserInfoPayload(raw: Record<string, unknown>): UserInfo {
     avatar: String(raw.avatar ?? ''),
     roles: Array.isArray(raw.roles) ? (raw.roles as string[]) : [],
     homePath: String(homePath ?? ''),
+    email: String(raw.email ?? ''),
+    mobile: String(raw.mobile ?? ''),
     desc: String(raw.desc ?? ''),
     token: String(raw.token ?? ''),
   };
@@ -23,8 +25,9 @@ function normalizeUserInfoPayload(raw: Record<string, unknown>): UserInfo {
 
 /**
  * 获取用户信息
+ * GET /api/auth/me
  */
 export async function getUserInfoApi() {
-  const raw = await requestClient.get<Record<string, unknown>>('/user/info');
+  const raw = await requestClient.get<Record<string, unknown>>('/auth/me');
   return normalizeUserInfoPayload(raw);
 }

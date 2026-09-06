@@ -1,6 +1,6 @@
 /**
  * 系统管理 - 角色接口
- * 后端: GET/POST {{base_url}}/api/system/role/*
+ * 后端 RESTful: /api/system/roles
  */
 import { requestClient } from '#/api/request';
 
@@ -45,9 +45,9 @@ export namespace RoleApi {
   }
 }
 
-/** 角色列表；兼容 { list, total }（真实后端）/ { items, total }（Mock）/ 数组 */
+/** 角色列表 GET /api/system/roles */
 export async function getRoleListApi(params: RoleApi.RoleListParams) {
-  const data = await requestClient.get<any>('/system/role/list', { params });
+  const data = await requestClient.get<any>('/system/roles', { params });
   if (Array.isArray(data)) {
     return { list: data as RoleApi.RoleItem[], total: data.length };
   }
@@ -55,24 +55,29 @@ export async function getRoleListApi(params: RoleApi.RoleListParams) {
   return { list, total: (data?.total as number) ?? list.length };
 }
 
-/** 创建角色 POST /api/system/role/create */
+/** 创建角色 POST /api/system/roles */
 export async function createRoleApi(data: RoleApi.RoleCreateParams) {
-  return requestClient.post<unknown>('/system/role/create', data);
+  return requestClient.post<unknown>('/system/roles', data);
 }
 
-/** 更新角色 POST /api/system/role/update */
+/** 更新角色 PUT /api/system/roles/{id} */
 export async function updateRoleApi(data: RoleApi.RoleUpdateParams) {
-  return requestClient.post<unknown>('/system/role/update', data);
+  const { id, ...body } = data;
+  return requestClient.put<unknown>(`/system/roles/${id}`, body);
 }
 
-/** 删除角色 POST /api/system/role/delete */
+/** 删除角色 DELETE /api/system/roles/{id} */
 export async function deleteRoleApi(id: number) {
-  return requestClient.post<unknown>('/system/role/delete', { id });
+  return requestClient.delete<unknown>(`/system/roles/${id}`);
 }
 
-/** 启用/禁用角色 POST /api/system/role/updateStatus */
+/** 启用/禁用角色 PATCH /api/system/roles/{id} */
 export async function updateRoleStatusApi(
   data: RoleApi.RoleUpdateStatusParams,
 ) {
-  return requestClient.post<unknown>('/system/role/updateStatus', data);
+  const { id, status } = data;
+  return requestClient.request<unknown>(`/system/roles/${id}`, {
+    data: { status },
+    method: 'PATCH',
+  });
 }

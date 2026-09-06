@@ -44,11 +44,11 @@ export async function loginApi(data: AuthApi.LoginParams) {
 
 /**
  * 手机号+验证码登录
- * POST /api/auth/loginByCode
+ * POST /api/auth/login-by-code
  */
 export async function loginByCodeApi(data: AuthApi.LoginByCodeParams) {
   const res = await requestClient.post<{ accessToken?: string; token?: string }>(
-    '/auth/loginByCode',
+    '/auth/login-by-code',
     data,
   );
   return mapLoginResult(res as unknown as { accessToken?: string; token?: string });

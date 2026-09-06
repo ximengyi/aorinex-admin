@@ -1,6 +1,6 @@
 /**
  * 系统管理 - 菜单接口
- * 后端: GET/POST {{base_url}}/api/system/menu/*
+ * 后端 RESTful: /api/system/menus
  */
 import { requestClient } from '#/api/request';
 
@@ -46,24 +46,25 @@ export namespace MenuApi {
   }
 }
 
-/** 菜单树 GET /api/system/menu/tree */
+/** 菜单树 GET /api/system/menus */
 export async function getMenuTreeApi(params?: MenuApi.MenuTreeParams) {
-  return requestClient.get<MenuApi.MenuItem[]>('/system/menu/tree', {
+  return requestClient.get<MenuApi.MenuItem[]>('/system/menus', {
     params: params ?? { status: 0 },
   });
 }
 
-/** 创建菜单 POST /api/system/menu/create */
+/** 创建菜单 POST /api/system/menus */
 export async function createMenuApi(data: MenuApi.MenuCreateParams) {
-  return requestClient.post<unknown>('/system/menu/create', data);
+  return requestClient.post<unknown>('/system/menus', data);
 }
 
-/** 更新菜单 POST /api/system/menu/update */
+/** 更新菜单 PUT /api/system/menus/{id} */
 export async function updateMenuApi(data: MenuApi.MenuUpdateParams) {
-  return requestClient.post<unknown>('/system/menu/update', data);
+  const { id, ...body } = data;
+  return requestClient.put<unknown>(`/system/menus/${id}`, body);
 }
 
-/** 删除菜单 POST /api/system/menu/delete */
+/** 删除菜单 DELETE /api/system/menus/{id} */
 export async function deleteMenuApi(id: number) {
-  return requestClient.post<unknown>('/system/menu/delete', { id });
+  return requestClient.delete<unknown>(`/system/menus/${id}`);
 }

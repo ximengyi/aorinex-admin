@@ -1,6 +1,6 @@
 /**
  * 用户管理（C 端用户表 user）
- * 后端: /api/system/c_user/* ，字段 snake_case，统一 { code, msg, data }
+ * 后端 RESTful: /api/system/c-users ，字段 snake_case，统一 { code, msg, data }
  */
 import { requestClient } from '#/api/request';
 
@@ -84,30 +84,33 @@ function normalizeListPayload(data: any): EndUserApi.EndUserListResult {
   return { list, total };
 }
 
-/** 列表 GET /api/system/c_user/list */
+/** 列表 GET /api/system/c-users */
 export async function getEndUserListApi(params: EndUserApi.EndUserListParams) {
-  const data = await requestClient.get<any>('/system/c_user/list', { params });
+  const data = await requestClient.get<any>('/system/c-users', { params });
   return normalizeListPayload(data);
 }
 
-/** 详情 GET /api/system/c_user/detail */
+/** 详情 GET /api/system/c-users/{id} */
 export async function getEndUserDetailApi(id: number) {
-  return requestClient.get<EndUserApi.EndUserItem>('/system/c_user/detail', {
-    params: { id },
-  });
+  return requestClient.get<EndUserApi.EndUserItem>(`/system/c-users/${id}`);
 }
 
-/** 创建 POST /api/system/c_user/create */
+/** 创建 POST /api/system/c-users */
 export async function createEndUserApi(data: EndUserApi.EndUserCreateParams) {
-  return requestClient.post<unknown>('/system/c_user/create', data);
+  return requestClient.post<unknown>('/system/c-users', data);
 }
 
-/** 更新 POST /api/system/c_user/update */
+/** 更新 PUT /api/system/c-users/{id} */
 export async function updateEndUserApi(data: EndUserApi.EndUserUpdateParams) {
-  return requestClient.post<unknown>('/system/c_user/update', data);
+  const { id, ...body } = data;
+  return requestClient.put<unknown>(`/system/c-users/${id}`, body);
 }
 
-/** 启用/禁用 POST /api/system/c_user/updateStatus */
+/** 启用/禁用 PATCH /api/system/c-users/{id} */
 export async function updateEndUserStatusApi(data: EndUserApi.EndUserUpdateStatusParams) {
-  return requestClient.post<unknown>('/system/c_user/updateStatus', data);
+  const { id, status } = data;
+  return requestClient.request<unknown>(`/system/c-users/${id}`, {
+    data: { status },
+    method: 'PATCH',
+  });
 }

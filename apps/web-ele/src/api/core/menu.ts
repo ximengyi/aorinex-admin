@@ -4,7 +4,14 @@ import { requestClient } from '#/api/request';
 
 /**
  * 获取用户所有菜单
+ * GET /api/menus
  */
 export async function getAllMenusApi() {
-  return requestClient.get<RouteRecordStringComponent[]>('/menu/all');
+  const data = await requestClient.get<
+    RouteRecordStringComponent[] | { menu_tree?: unknown; routes?: RouteRecordStringComponent[] }
+  >('/menus');
+  if (Array.isArray(data)) {
+    return data;
+  }
+  return data?.routes ?? [];
 }
