@@ -18,71 +18,49 @@ import {
   updateRoleApi,
   updateRoleStatusApi,
 } from '#/api/system/role';
-import {
-  getRuleCascaderOptionsApi,
-  normalizeRoleRuleIds,
-} from '#/api/system/rule';
+import { normalizeRoleRuleIds } from '#/api/system/rule';
 import { useVbenForm as useForm } from '#/adapter/form';
+
+import PermissionPanel from './modules/permission-panel.vue';
 
 defineOptions({ name: 'SystemRole' });
 
 /* =================== 新建 / 编辑 Modal =================== */
 const isEdit = ref(false);
 const editId = ref<number>();
+const ruleIds = ref<number[]>([]);
 
 const formSchema: VbenFormSchema[] = [
   { component: 'Input', fieldName: 'name', label: '角色名称', rules: 'required' },
   { component: 'Input', fieldName: 'summary', label: '描述' },
-  {
-    component: 'ApiCascader',
-    fieldName: 'rule_ids',
-    label: '关联权限',
-    componentProps: {
-      api: getRuleCascaderOptionsApi,
-      clearable: true,
-      filterable: true,
-      collapseTags: true,
-      collapseTagsTooltip: true,
-      showAllLevels: false,
-      class: 'w-full',
-      props: {
-        multiple: true,
-        checkStrictly: true,
-        emitPath: false,
-        expandTrigger: 'hover',
-        value: 'value',
-        label: 'label',
-        children: 'children',
-      },
-    },
-  },
 ];
 
 const [Form, formApi] = useForm({ schema: formSchema, showDefaultActions: false });
 
 const [Modal, modalApi] = useVbenModal({
   centered: true,
-  class: 'w-[640px]',
+  class: 'w-[780px]',
+  contentClass: 'overflow-visible',
   async onConfirm() {
     const { valid } = await formApi.validate();
     if (!valid) return;
     const values = await formApi.getValues();
-    const ruleIds = Array.isArray(values.rule_ids)
-      ? values.rule_ids.map(Number).filter((id: number) => id > 0)
-      : [];
+    const selectedRuleIds = (ruleIds.value ?? [])
+      .map(Number)
+      .filter((id) => id > 0);
     modalApi.lock();
     try {
       if (isEdit.value && editId.value) {
         await updateRoleApi({
           id: editId.value,
           ...values,
-          rule_ids: ruleIds,
+          rule_ids: selectedRuleIds,
         } as RoleApi.RoleUpdateParams);
         ElMessage.success('保存成功');
       } else {
         await createRoleApi({
           ...values,
-          rule_ids: ruleIds,
+          rule_ids: selectedRuleIds,
         } as RoleApi.RoleCreateParams);
         ElMessage.success('创建成功');
       }
@@ -97,17 +75,18 @@ const [Modal, modalApi] = useVbenModal({
 function openCreate() {
   isEdit.value = false;
   editId.value = undefined;
+  ruleIds.value = [];
   formApi.resetForm();
-  formApi.setValues({ rule_ids: [] });
   modalApi.open();
 }
 
 function openEdit(row: RoleApi.RoleItem) {
   isEdit.value = true;
   editId.value = row.id;
+  ruleIds.value = normalizeRoleRuleIds(row);
   formApi.setValues({
-    ...row,
-    rule_ids: normalizeRoleRuleIds(row),
+    name: row.name,
+    summary: row.summary,
   } as any);
   modalApi.open();
 }
@@ -168,7 +147,10 @@ async function toggleStatus(row: RoleApi.RoleItem) {
 <template>
   <Page auto-content-height title="角色管理">
     <Modal :title="isEdit ? '编辑角色' : '新建角色'">
-      <Form />
+      <div class="flex flex-col gap-4">
+        <Form />
+        <PermissionPanel v-model="ruleIds" />
+      </div>
     </Modal>
     <Grid table-title="角色列表">
       <template #statusSlot="{ row }">
