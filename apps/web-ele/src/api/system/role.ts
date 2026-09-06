@@ -9,7 +9,10 @@ export namespace RoleApi {
     id: number;
     name: string;
     summary?: string;
+    /** 权限 ID 列表（前端表单字段） */
     rule_ids?: number[];
+    /** 后端原始逗号分隔权限串 */
+    rules?: string;
     pid?: number;
     status?: number;
     created_at?: string;

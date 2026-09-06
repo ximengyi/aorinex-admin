@@ -18,7 +18,10 @@ import {
   updateRoleApi,
   updateRoleStatusApi,
 } from '#/api/system/role';
-import { getRuleListApi } from '#/api/system/rule';
+import {
+  getRuleCascaderOptionsApi,
+  normalizeRoleRuleIds,
+} from '#/api/system/rule';
 import { useVbenForm as useForm } from '#/adapter/form';
 
 defineOptions({ name: 'SystemRole' });
@@ -31,16 +34,26 @@ const formSchema: VbenFormSchema[] = [
   { component: 'Input', fieldName: 'name', label: '角色名称', rules: 'required' },
   { component: 'Input', fieldName: 'summary', label: '描述' },
   {
-    component: 'ApiSelect',
+    component: 'ApiCascader',
     fieldName: 'rule_ids',
     label: '关联权限',
     componentProps: {
-      api: async () => {
-        const { list } = await getRuleListApi({ per_page: 200 });
-        return list.map((r) => ({ label: r.title, value: r.id }));
-      },
-      mode: 'multiple',
+      api: getRuleCascaderOptionsApi,
       clearable: true,
+      filterable: true,
+      collapseTags: true,
+      collapseTagsTooltip: true,
+      showAllLevels: false,
+      class: 'w-full',
+      props: {
+        multiple: true,
+        checkStrictly: true,
+        emitPath: false,
+        expandTrigger: 'hover',
+        value: 'value',
+        label: 'label',
+        children: 'children',
+      },
     },
   },
 ];
@@ -49,18 +62,28 @@ const [Form, formApi] = useForm({ schema: formSchema, showDefaultActions: false 
 
 const [Modal, modalApi] = useVbenModal({
   centered: true,
-  class: 'w-[560px]',
+  class: 'w-[640px]',
   async onConfirm() {
     const { valid } = await formApi.validate();
     if (!valid) return;
     const values = await formApi.getValues();
+    const ruleIds = Array.isArray(values.rule_ids)
+      ? values.rule_ids.map(Number).filter((id: number) => id > 0)
+      : [];
     modalApi.lock();
     try {
       if (isEdit.value && editId.value) {
-        await updateRoleApi({ id: editId.value, ...values } as RoleApi.RoleUpdateParams);
+        await updateRoleApi({
+          id: editId.value,
+          ...values,
+          rule_ids: ruleIds,
+        } as RoleApi.RoleUpdateParams);
         ElMessage.success('保存成功');
       } else {
-        await createRoleApi(values as RoleApi.RoleCreateParams);
+        await createRoleApi({
+          ...values,
+          rule_ids: ruleIds,
+        } as RoleApi.RoleCreateParams);
         ElMessage.success('创建成功');
       }
       gridApi.query();
@@ -75,13 +98,17 @@ function openCreate() {
   isEdit.value = false;
   editId.value = undefined;
   formApi.resetForm();
+  formApi.setValues({ rule_ids: [] });
   modalApi.open();
 }
 
 function openEdit(row: RoleApi.RoleItem) {
   isEdit.value = true;
   editId.value = row.id;
-  formApi.setValues(row as any);
+  formApi.setValues({
+    ...row,
+    rule_ids: normalizeRoleRuleIds(row),
+  } as any);
   modalApi.open();
 }
 

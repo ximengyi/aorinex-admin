@@ -111,6 +111,12 @@ const ElTreeSelect = defineAsyncComponent(() =>
     import('element-plus/es/components/tree-select/style/css'),
   ]).then(([res]) => res.ElTreeSelect),
 );
+const ElCascader = defineAsyncComponent(() =>
+  Promise.all([
+    import('element-plus/es/components/cascader/index'),
+    import('element-plus/es/components/cascader/style/css'),
+  ]).then(([res]) => res.ElCascader),
+);
 const ElUpload = defineAsyncComponent(() =>
   Promise.all([
     import('element-plus/es/components/upload/index'),
@@ -154,8 +160,10 @@ const withDefaultPlaceholder = <T extends Component>(
 
 // 这里需要自行根据业务组件库进行适配，需要用到的组件都需要在这里类型说明
 export type ComponentType =
+  | 'ApiCascader'
   | 'ApiSelect'
   | 'ApiTreeSelect'
+  | 'Cascader'
   | 'Checkbox'
   | 'CheckboxGroup'
   | 'DatePicker'
@@ -177,6 +185,20 @@ async function initComponentAdapter() {
     // 如果你的组件体积比较大，可以使用异步加载
     // Button: () =>
     // import('xxx').then((res) => res.Button),
+    ApiCascader: withDefaultPlaceholder(
+      {
+        ...ApiComponent,
+        name: 'ApiCascader',
+      },
+      'select',
+      {
+        component: ElCascader,
+        childrenField: 'children',
+        loadingSlot: 'suffixIcon',
+        optionsPropName: 'options',
+        visibleEvent: 'onVisibleChange',
+      },
+    ),
     ApiSelect: withDefaultPlaceholder(
       {
         ...ApiComponent,
@@ -204,6 +226,7 @@ async function initComponentAdapter() {
         visibleEvent: 'onVisibleChange',
       },
     ),
+    Cascader: withDefaultPlaceholder(ElCascader, 'select'),
     Checkbox: ElCheckbox,
     CheckboxGroup: (props, { attrs, slots }) => {
       let defaultSlot;
