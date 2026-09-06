@@ -63,10 +63,47 @@ function isChecked(id: number) {
   return selectedSet.value.has(id);
 }
 
+/** 在权限树中查找节点 */
+function findNode(
+  nodes: RuleCascaderOption[],
+  id: number,
+): RuleCascaderOption | undefined {
+  for (const node of nodes) {
+    if (node.value === id) return node;
+    if (node.children?.length) {
+      const found = findNode(node.children, id);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
+/** 收集节点下全部子孙权限 ID */
+function collectDescendantIds(node: RuleCascaderOption): number[] {
+  const ids: number[] = [];
+  const walk = (current: RuleCascaderOption) => {
+    if (!current.children?.length) return;
+    for (const child of current.children) {
+      ids.push(child.value);
+      walk(child);
+    }
+  };
+  walk(node);
+  return ids;
+}
+
+/**
+ * 勾选某一级时，同步勾选其下全部子权限；
+ * 取消勾选时，同步取消其下全部子权限。
+ */
 function toggle(id: number, checked: boolean) {
   const next = new Set(modelValue.value ?? []);
-  if (checked) next.add(id);
-  else next.delete(id);
+  const node = findNode(tree.value, id);
+  const targetIds = [id, ...(node ? collectDescendantIds(node) : [])];
+  for (const targetId of targetIds) {
+    if (checked) next.add(targetId);
+    else next.delete(targetId);
+  }
   modelValue.value = [...next];
 }
 
