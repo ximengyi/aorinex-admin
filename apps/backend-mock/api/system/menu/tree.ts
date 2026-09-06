@@ -124,27 +124,6 @@ const SYSTEM_MENU_TREE = [
       },
     ],
   },
-  {
-    id: 3,
-    title: '演示',
-    icon: 'lucide:flask-conical',
-    path: '/demos',
-    pid: 0,
-    type: 0,
-    weight: 3,
-    children: [
-      {
-        id: 31,
-        title: '基础示例',
-        icon: 'lucide:file',
-        path: '/demos/basic',
-        pid: 3,
-        type: 1,
-        weight: 1,
-        children: [],
-      },
-    ],
-  },
 ];
 
 export default eventHandler(async (event) => {
