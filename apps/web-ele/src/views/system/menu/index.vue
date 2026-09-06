@@ -25,21 +25,132 @@ defineOptions({ name: 'SystemMenu' });
 const isEdit = ref(false);
 const editId = ref<number>();
 
+/**
+ * 由前端路由推导接口前缀 / 权限码：
+ *   /system/menu → api_path=/api/system，access_code=system:menu
+ * 仅在目标字段为空，或仍等于上次自动值时回填，避免覆盖手改。
+ */
+function deriveFromFrontendPath(frontendPath: string) {
+  const normalized = frontendPath.trim().replace(/\/+$/, '');
+  if (!normalized.startsWith('/')) {
+    return { apiPath: '', accessCode: '' };
+  }
+  const segments = normalized.split('/').filter(Boolean);
+  if (segments.length === 0) {
+    return { apiPath: '', accessCode: '' };
+  }
+  return {
+    apiPath: `/api/${segments[0]}`,
+    accessCode: segments.join(':'),
+  };
+}
+
+/** null = 已手改锁定，不再跟随路由自动更新 */
+const lastAutoApiPath = ref<null | string>('');
+const lastAutoAccessCode = ref<null | string>('');
+
+function syncDerivedFromRoute(
+  values: Record<string, any>,
+  form: { setFieldValue: (field: string, value: unknown) => void },
+) {
+  const frontendPath = String(values.frontend_path ?? '').trim();
+  if (!frontendPath) return;
+
+  const derived = deriveFromFrontendPath(frontendPath);
+  if (!derived.apiPath && !derived.accessCode) return;
+
+  const currentApi = String(values.api_path ?? '').trim();
+  if (
+    lastAutoApiPath.value !== null &&
+    (!currentApi || currentApi === lastAutoApiPath.value)
+  ) {
+    lastAutoApiPath.value = derived.apiPath;
+    form.setFieldValue('api_path', derived.apiPath);
+  }
+
+  const currentCode = String(values.access_code ?? '').trim();
+  if (
+    lastAutoAccessCode.value !== null &&
+    (!currentCode || currentCode === lastAutoAccessCode.value)
+  ) {
+    lastAutoAccessCode.value = derived.accessCode;
+    form.setFieldValue('access_code', derived.accessCode);
+  }
+}
+
+function resetAutoFillTracking(row?: Pick<MenuApi.MenuItem, 'frontend_path' | 'path' | 'api_path' | 'access_code'>) {
+  if (!row) {
+    lastAutoApiPath.value = '';
+    lastAutoAccessCode.value = '';
+    return;
+  }
+  const derived = deriveFromFrontendPath(
+    String(row.frontend_path || row.path || ''),
+  );
+  const api = String(row.api_path ?? '').trim();
+  const code = String(row.access_code ?? '').trim();
+  // 与推导值一致（或为空）则继续跟随；否则视为手改锁定
+  lastAutoApiPath.value =
+    !api || api === derived.apiPath ? api || derived.apiPath : null;
+  lastAutoAccessCode.value =
+    !code || code === derived.accessCode ? code || derived.accessCode : null;
+}
+
 const formSchema: VbenFormSchema[] = [
   { component: 'Input', fieldName: 'title', label: '菜单标题', rules: 'required' },
   { component: 'IconPicker', fieldName: 'icon', label: '图标' },
-  { component: 'Input', fieldName: 'frontend_path', label: '路由路径' },
+  {
+    component: 'Input',
+    fieldName: 'frontend_path',
+    label: '路由路径',
+    componentProps: {
+      placeholder: '如 /system/menu，失焦后自动推导接口前缀与权限码',
+    },
+    dependencies: {
+      trigger(values, form) {
+        syncDerivedFromRoute(values, form);
+      },
+      triggerFields: ['frontend_path'],
+    },
+  },
   {
     component: 'Input',
     fieldName: 'api_path',
     label: '接口前缀',
-    componentProps: { placeholder: '如 /api/system，供后端鉴权前缀匹配' },
+    componentProps: { placeholder: '如 /api/system，可由路由自动推导' },
+    dependencies: {
+      // 手改后锁定，避免继续被路由覆盖
+      trigger(values) {
+        const current = String(values.api_path ?? '').trim();
+        if (
+          lastAutoApiPath.value !== null &&
+          current &&
+          current !== lastAutoApiPath.value
+        ) {
+          lastAutoApiPath.value = null;
+        }
+      },
+      triggerFields: ['api_path'],
+    },
   },
   {
     component: 'Input',
     fieldName: 'access_code',
     label: '权限码',
-    componentProps: { placeholder: '如 system:menu:edit，供 v-access 与 /auth/codes' },
+    componentProps: { placeholder: '如 system:menu，可由路由自动推导' },
+    dependencies: {
+      trigger(values) {
+        const current = String(values.access_code ?? '').trim();
+        if (
+          lastAutoAccessCode.value !== null &&
+          current &&
+          current !== lastAutoAccessCode.value
+        ) {
+          lastAutoAccessCode.value = null;
+        }
+      },
+      triggerFields: ['access_code'],
+    },
   },
   {
     component: 'InputNumber',
@@ -99,6 +210,7 @@ const [Modal, modalApi] = useVbenModal({
 function openCreate() {
   isEdit.value = false;
   editId.value = undefined;
+  resetAutoFillTracking();
   formApi.resetForm();
   modalApi.open();
 }
@@ -106,6 +218,7 @@ function openCreate() {
 function openEdit(row: MenuApi.MenuItem) {
   isEdit.value = true;
   editId.value = row.id;
+  resetAutoFillTracking(row);
   formApi.setValues(row as any);
   modalApi.open();
 }
