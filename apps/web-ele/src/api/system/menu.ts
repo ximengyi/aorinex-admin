@@ -5,15 +5,16 @@
 import { requestClient } from '#/api/request';
 
 export namespace MenuApi {
-  /** 与后端 mapRuleToMenuArray 一致；path 兼容为前端路由 */
+  /** 与后端 mapRuleToMenuArray 一致 */
   export interface MenuItem {
     id: number;
     title: string;
     icon?: string;
     pid: number;
-    path?: string;
-    /** 前端路由（与 path 对 type0/1 通常一致） */
+    /** 前端路由 */
     frontend_path?: string;
+    /** 响应别名，等同 frontend_path（Vben 动态路由） */
+    path?: string;
     /** 接口鉴权前缀，如 /api/system */
     api_path?: string;
     /** 权限码 system:xxx，进入 GET /api/auth/codes */
@@ -34,7 +35,7 @@ export namespace MenuApi {
     title: string;
     icon?: string;
     pid?: number;
-    path?: string;
+    frontend_path?: string;
     api_path?: string;
     access_code?: string;
     type?: number;

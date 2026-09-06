@@ -28,7 +28,7 @@ const editId = ref<number>();
 const formSchema: VbenFormSchema[] = [
   { component: 'Input', fieldName: 'title', label: '菜单标题', rules: 'required' },
   { component: 'IconPicker', fieldName: 'icon', label: '图标' },
-  { component: 'Input', fieldName: 'path', label: '路由路径' },
+  { component: 'Input', fieldName: 'frontend_path', label: '路由路径' },
   {
     component: 'Input',
     fieldName: 'api_path',
@@ -134,7 +134,7 @@ const gridOptions: VxeGridProps<MenuApi.MenuItem> = {
       treeNode: true,
       slots: { default: 'titleSlot' },
     },
-    { field: 'path', title: '路由路径', minWidth: 140 },
+    { field: 'frontend_path', title: '路由路径', minWidth: 140 },
     { field: 'api_path', title: '接口前缀', minWidth: 120 },
     { field: 'access_code', title: '权限码', minWidth: 140 },
     {

@@ -13,7 +13,6 @@ export namespace RuleApi {
     icon?: string;
     pid: number;
     href?: string;
-    path?: string;
     frontend_path?: string;
     api_path?: string;
     access_code?: string;
@@ -41,7 +40,6 @@ export namespace RuleApi {
     summary?: string;
     pid?: number;
     href?: string;
-    path?: string;
     frontend_path?: string;
     api_path?: string;
     access_code?: string;

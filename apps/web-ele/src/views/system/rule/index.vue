@@ -19,7 +19,6 @@ const gridOptions: VxeGridProps<RuleApi.RuleItem> = {
       width: 100,
       formatter: ({ row }) => (row as RuleApi.RuleItem).summary || (row as RuleApi.RuleItem).icon || '-',
     },
-    { field: 'path', title: '兼容 path', minWidth: 120 },
     { field: 'frontend_path', title: '前端路由', minWidth: 120 },
     { field: 'api_path', title: '接口前缀', minWidth: 120 },
     { field: 'access_code', title: '权限码', minWidth: 130 },
